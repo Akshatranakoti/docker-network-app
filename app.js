@@ -8,7 +8,7 @@ const PORT = 3000;
 app.use(express.json()); // middleware to parse JSON
 
 // ✅ MongoDB Connection (replace <MONGO_URI> with your actual MongoDB URI)
-const MONGO_URI = 'mongodb://172.17.0.3:27017/mydb'; // change if using Atlas or different host
+const MONGO_URI = 'mongodb://mongodb:27017/mydb'; // change if using Atlas or different host
 
 mongoose.connect(MONGO_URI, {
   useNewUrlParser: true,
