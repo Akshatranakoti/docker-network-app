@@ -1,81 +1,43 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const axios = require('axios').default;
-const mongoose = require('mongoose');
-
-const Favorite = require('./models/favorite');
+const axios = require('axios');
 
 const app = express();
+const PORT = 3000;
 
-app.use(bodyParser.json());
-
-app.get('/favorites', async (req, res) => {
-  const favorites = await Favorite.find();
-  res.status(200).json({
-    favorites: favorites,
-  });
-});
-
-app.post('/favorites', async (req, res) => {
-  const favName = req.body.name;
-  const favType = req.body.type;
-  const favUrl = req.body.url;
-
+// Example route: fetch characters from Rick & Morty API
+app.get('/characters', async (req, res) => {
   try {
-    if (favType !== 'movie' && favType !== 'character') {
-      throw new Error('"type" should be "movie" or "character"!');
-    }
-    const existingFav = await Favorite.findOne({ name: favName });
-    if (existingFav) {
-      throw new Error('Favorite exists already!');
-    }
+    const response = await axios.get('https://rickandmortyapi.com/api/character');
+    res.json(response.data);
   } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
-
-  const favorite = new Favorite({
-    name: favName,
-    type: favType,
-    url: favUrl,
-  });
-
-  try {
-    await favorite.save();
-    res
-      .status(201)
-      .json({ message: 'Favorite saved!', favorite: favorite.toObject() });
-  } catch (error) {
-    res.status(500).json({ message: 'Something went wrong.' });
+    console.error(error.message);
+    res.status(500).json({ error: 'Failed to fetch characters' });
   }
 });
 
-app.get('/movies', async (req, res) => {
+// Example route: fetch locations
+app.get('/locations', async (req, res) => {
   try {
-    const response = await axios.get('https://swapi.dev/api/films');
-    res.status(200).json({ movies: response.data });
+    const response = await axios.get('https://rickandmortyapi.com/api/location');
+    res.json(response.data);
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong.' });
+    console.error(error.message);
+    res.status(500).json({ error: 'Failed to fetch locations' });
   }
 });
 
-app.get('/people', async (req, res) => {
+// Example route: fetch episodes
+app.get('/episodes', async (req, res) => {
   try {
-    const response = await axios.get('https://swapi.dev/api/people');
-    res.status(200).json({ people: response.data });
+    const response = await axios.get('https://rickandmortyapi.com/api/episode');
+    res.json(response.data);
   } catch (error) {
-    res.status(500).json({ message: 'Something went wrong.' });
+    console.error(error.message);
+    res.status(500).json({ error: 'Failed to fetch episodes' });
   }
 });
 
-app.listen(3000,'0.0.0.0');
-// mongoose.connect(
-//   'mongodb://localhost:27017/swfavorites',
-//   { useNewUrlParser: true },
-//   (err) => {
-//     if (err) {
-//       console.log(err);
-//     } else {
-//       app.listen(3000);
-//     }
-//   }
-// );
+// Listen on 0.0.0.0 so it’s accessible from outside EC2
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on http://0.0.0.0:${PORT}`);
+});
